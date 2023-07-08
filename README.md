@@ -10,3 +10,4 @@ Certifique-se de atender aos seguintes requisitos antes de executar este projeto
 - Servidor MySQL instalado e configurado
 - Extensão PDO do PHP habilitada
 
+Utilizado XAMP para servidor PHP e MySQL para realizar os testes
