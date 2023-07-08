@@ -7,8 +7,9 @@ function atualizarEstoque($json)
 
     $produtos = json_decode($json, true);
 
-    $insertQuery = "INSERT INTO estoque (produto, cor, tamanho, deposito, data_disponibilidade, quantidade) VALUES (?, ?, ?, ?, ?, ?)";
-    $updateQuery = "UPDATE estoque SET quantidade = ? WHERE produto = ? AND cor = ? AND tamanho = ? AND data_disponibilidade = ? AND deposito = ?";
+    $insertQuery = "INSERT INTO estoque (produto, cor, tamanho, deposito, data_disponibilidade, quantidade) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE quantidade = ?";
 
     $pdo->beginTransaction();
 
@@ -16,35 +17,21 @@ function atualizarEstoque($json)
        
         if (!empty($produtos) && is_array($produtos)) {
             foreach ($produtos as $produto) {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM estoque WHERE produto = ? AND cor = ? AND tamanho = ? AND data_disponibilidade = ? AND deposito = ?");
-            $stmt->execute([$produto['produto'], $produto['cor'], $produto['tamanho'], $produto['deposito'], $produto['data_disponibilidade']]);
-            $count = $stmt->fetchColumn();
-
-            if ($count > 0) {
-                $stmt = $pdo->prepare($updateQuery);
+                $stmt = $pdo->prepare($insertQuery);
                 $stmt->execute([
-                    $produto['quantidade'],
                     $produto['produto'],
                     $produto['cor'],
                     $produto['tamanho'],
                     $produto['deposito'],
-                    $produto['data_disponibilidade']
-                ]);
-            } else {
-                $stmt = $pdo->prepare($insertQuery);
-                $stmt->execute([
-                    $produto['produto'],
-                    $produto['cor'], 
-                    $produto['tamanho'],
-                    $produto['deposito'],
                     $produto['data_disponibilidade'],
+                    $produto['quantidade'],
                     $produto['quantidade']
                 ]);
             }
-        }}
-        else{
+        } else {
             echo "Nenhum produto encontrado no JSON.";
         }
+
         $pdo->commit();
 
         echo "Atualização de estoque concluída com sucesso!";
@@ -63,7 +50,7 @@ $json ='[
     "tamanho": "P",
     "deposito": "DEP1",
     "data_disponibilidade": "2023-05-01",
-    "quantidade": 15
+    "quantidade": 12
     },
     {
     "produto": "11.01.0568",
@@ -71,7 +58,7 @@ $json ='[
     "tamanho": "P",
     "deposito": "DEP1",
     "data_disponibilidade": "2023-05-01",
-    "quantidade": 2
+    "quantidade": 5
     },
     {
     "produto": "11.01.0568",
@@ -79,7 +66,7 @@ $json ='[
     "tamanho": "M",
     "deposito": "DEP1",
     "data_disponibilidade": "2023-05-01",
-    "quantidade": 4
+    "quantidade": 3
     },
     {
     "produto": "11.01.0568",
@@ -87,7 +74,7 @@ $json ='[
     "tamanho": "G",
     "deposito": "1",
     "data_disponibilidade": "2023-05-01",
-    "quantidade": 6
+    "quantidade": 25
     },
     {
     "produto": "11.01.0568",
@@ -95,9 +82,9 @@ $json ='[
     "tamanho": "P",
     "deposito": "DEP1",
     "data_disponibilidade": "2023-06-01",
-    "quantidade": 8
+    "quantidade": 1
     }
-    ]';
+]';
 
 atualizarEstoque($json);
 ?>
